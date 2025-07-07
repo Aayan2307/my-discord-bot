@@ -1,16 +1,21 @@
 import os
+import discord
+from discord.ext import commands
 from dotenv import load_dotenv
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+# ── setup ─────────────────────────────────────────────
 load_dotenv()
-token = os.getenv("DISCORD_TOKEN")
-bot.run(token)
+TOKEN = os.getenv("DISCORD_TOKEN")
 
 PREFIX = "t!"
 BOT_COLOR = discord.Color.blue()
 
 intents = discord.Intents.default()
 intents.message_content = True
-client = discord.Client(intents=intents)
 
+bot = commands.Bot(command_prefix=PREFIX, intents=intents)
 # Google Sheets
 scope = [
     "https://spreadsheets.google.com/feeds",
@@ -23,6 +28,11 @@ teams = gc.open("TFS Auction").worksheet("Teams")
 
 TIER_MIN = {"A": 30, "B": 15, "C": 5}  # M
 bid_timers = {}  # key = player.lower() → asyncio.Task
+
+# ── events ────────────────────────────────────────────
+@bot.event
+async def on_ready():
+    print(f"Logged in as {bot.user} ✅")
 
 
 # ── helpers ─────────────────────────────────────────────────────────
@@ -330,5 +340,5 @@ async def on_message(msg: discord.Message):
             f"**Remaining:** {tdata['Budget']}M\\n**Tier‑A Used:** {tdata['TierA Count']}/2",
             discord.Color.gold()))
         return
-
-client.run(TOKEN)
+# ── launch ────────────────────────────────────────────
+bot.run(TOKEN)
